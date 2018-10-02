@@ -1,5 +1,6 @@
 import url from 'url';
-import request from 'request';
+import axios, { AxiosInstance } from 'axios';
+import qs from 'querystring';
 
 type Speaker = 'show' | 'haruka' | 'hikari' | 'takeru' | 'santa' | 'bear';
 type Format = 'wav' | 'ogg' | 'mp3';
@@ -20,18 +21,29 @@ export interface VoiceTextParams extends Options {
 }
 
 export default class VoiceText {
+  axios: AxiosInstance;
+
   // VoiceText Web API KEY
   apiKey: string;
 
   // VoiceText Base URL
   baseUrl = 'https://api.voicetext.jp';
+  // VoiceText API URL
+  url = '/v1/tts';
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
+    this.axios = axios.create({
+      auth: {
+        username: apiKey,
+        password: '',
+      },
+      responseType: 'arraybuffer',
+    });
   }
 
   get apiUrl() {
-    return url.resolve(this.baseUrl, '/v1/tts');
+    return url.resolve(this.baseUrl, this.url);
   }
 
   tts(text: string, speaker: Speaker, options?: Options) {
@@ -72,27 +84,15 @@ export default class VoiceText {
   request(params: VoiceTextParams) {
     this.validate(params);
 
-    return new Promise((resolve, reject) => {
-      request.post(
-        this.apiUrl,
-        {
-          form: params,
-          auth: {
-            user: this.apiKey,
-          },
-          encoding: null, // return body as a Buffer
-        },
-        (error, response, body) => {
-          if (error) {
-            return reject(error);
-          }
-          if (response.statusCode !== 200) {
-            return reject(JSON.parse(body.toString()));
-          }
-          return resolve(body);
+    return this.axios
+      .post(this.apiUrl, qs.stringify(params))
+      .then(response => new Buffer(response.data))
+      .catch(error => {
+        if (error && error.response && error.response.data) {
+          error.response.data = new Buffer(error.response.data).toString();
         }
-      );
-    });
+        throw error;
+      });
   }
 
   validate(params: VoiceTextParams) {

@@ -4,9 +4,10 @@ import VoiceText, { VoiceTextParams } from '../VoiceText';
 const apiKey = 'VoiceTextAPIKEY';
 const vt = new VoiceText(apiKey);
 
-test('VoiceText apiUrl', () => {
-  expect(vt.apiUrl).toBe('https://api.voicetext.jp/v1/tts');
-});
+const host = 'http://localhost';
+
+// set axios instance for test
+vt.baseUrl = host;
 
 test('throw validation error', () => {
   expect(() => {
@@ -39,62 +40,138 @@ test('throw validation error', () => {
   ).toBe(true);
 });
 
-test('request tts', async () => {
-  nock(vt.baseUrl)
-    .post('/v1/tts', (body: VoiceTextParams) => {
+test('success tts request', async () => {
+  const resBuf = new Buffer('tts');
+  nock(host)
+    .post(vt.url, (body: VoiceTextParams) => {
       return body && body.text && body.speaker;
     })
     .basicAuth({
       user: apiKey,
       pass: '',
     })
-    .reply(200, new Buffer('tts'));
+    .reply(200, resBuf);
 
-  const authorizedRes = await vt.tts('hello', 'show');
-  await expect(authorizedRes).toMatchObject(new Buffer('tts'));
+  const tts = await vt.tts('hello', 'show');
+  await expect(tts).toMatchObject(resBuf);
 });
 
-test('request wav', async () => {
-  nock(vt.baseUrl)
-    .post('/v1/tts', (body: VoiceTextParams) => {
+test('error tts request', async () => {
+  const errMessage = 'tts error';
+  nock(host)
+    .post(vt.url, (body: VoiceTextParams) => {
+      return body && body.text && body.speaker;
+    })
+    .basicAuth({
+      user: apiKey,
+      pass: '',
+    })
+    .reply(400, errMessage);
+
+  await expect(vt.tts('hello', 'show')).rejects.toHaveProperty(
+    ['response', 'data'],
+    errMessage
+  );
+});
+
+test('success wav request', async () => {
+  const resBuf = new Buffer('wav');
+  nock(host)
+    .post(vt.url, (body: VoiceTextParams) => {
       return body && body.text && body.speaker && body.format === 'wav';
     })
     .basicAuth({
       user: apiKey,
       pass: '',
     })
-    .reply(200, new Buffer('wav'));
+    .reply(200, resBuf);
 
   const wav = await vt.wav('hello', 'show');
-  await expect(wav).toMatchObject(new Buffer('wav'));
+  await expect(wav).toMatchObject(resBuf);
 });
 
-test('request ogg', async () => {
-  nock(vt.baseUrl)
-    .post('/v1/tts', (body: VoiceTextParams) => {
+test('error wav request', async () => {
+  const errMessage = 'wav error';
+  nock(host)
+    .post(vt.url, (body: VoiceTextParams) => {
+      return body && body.text && body.speaker && body.format === 'wav';
+    })
+    .basicAuth({
+      user: apiKey,
+      pass: '',
+    })
+    .reply(400, errMessage);
+
+  await expect(vt.wav('hello', 'show')).rejects.toHaveProperty(
+    ['response', 'data'],
+    errMessage
+  );
+});
+
+test('success ogg request', async () => {
+  const resBuf = new Buffer('ogg');
+  nock(host)
+    .post(vt.url, (body: VoiceTextParams) => {
       return body && body.text && body.speaker && body.format === 'ogg';
     })
     .basicAuth({
       user: apiKey,
       pass: '',
     })
-    .reply(200, new Buffer('ogg'));
+    .reply(200, resBuf);
 
   const wav = await vt.ogg('hello', 'show');
-  await expect(wav).toMatchObject(new Buffer('ogg'));
+  await expect(wav).toMatchObject(resBuf);
 });
 
-test('request mp3', async () => {
-  nock(vt.baseUrl)
-    .post('/v1/tts', (body: VoiceTextParams) => {
+test('error ogg request', async () => {
+  const errMessage = 'ogg error';
+  nock(host)
+    .post(vt.url, (body: VoiceTextParams) => {
+      return body && body.text && body.speaker && body.format === 'ogg';
+    })
+    .basicAuth({
+      user: apiKey,
+      pass: '',
+    })
+    .reply(400, errMessage);
+
+  await expect(vt.ogg('hello', 'show')).rejects.toHaveProperty(
+    ['response', 'data'],
+    errMessage
+  );
+});
+
+test('success mp3 request', async () => {
+  const resBuf = new Buffer('mp3');
+  nock(host)
+    .post(vt.url, (body: VoiceTextParams) => {
       return body && body.text && body.speaker && body.format === 'mp3';
     })
     .basicAuth({
       user: apiKey,
       pass: '',
     })
-    .reply(200, new Buffer('mp3'));
+    .reply(200, resBuf);
 
   const mp3 = await vt.mp3('hello', 'show');
-  await expect(mp3).toMatchObject(new Buffer('mp3'));
+  await expect(mp3).toMatchObject(resBuf);
+});
+
+test('error mp3 request', async () => {
+  const errMessage = 'mp3 error';
+  nock(host)
+    .post(vt.url, (body: VoiceTextParams) => {
+      return body && body.text && body.speaker && body.format === 'mp3';
+    })
+    .basicAuth({
+      user: apiKey,
+      pass: '',
+    })
+    .reply(400, errMessage);
+
+  await expect(vt.mp3('hello', 'show')).rejects.toHaveProperty(
+    ['response', 'data'],
+    errMessage
+  );
 });
