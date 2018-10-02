@@ -1,6 +1,6 @@
 {
   "name": "@shooontan/voicetext",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "VoiceText Web API Client for Node.js",
   "main": "build/index.js",
   "license": "MIT",
