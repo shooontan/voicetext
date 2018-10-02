@@ -1,6 +1,6 @@
 # @shooontan/voicetext
 
-[![npm version](https://badge.fury.io/js/%40shooontan%2Fvoicetext.svg)](https://badge.fury.io/js/%40shooontan%2Fvoicetext)
+[![npm version](https://img.shields.io/npm/v/@shooontan/voicetext.svg)](https://www.npmjs.com/package/@shooontan/voicetext)
 [![Build Status](https://travis-ci.org/shooontan/voicetext.svg?branch=master)](https://travis-ci.org/shooontan/voicetext)
 
 Get audio data from [VoiceText](https://cloud.voicetext.jp/webapi) Web API.
